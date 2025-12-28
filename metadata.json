@@ -1,0 +1,5 @@
+{
+  "name": "AI Music Theory Tutor",
+  "description": "An interactive web application that teaches the fundamentals of music theory, based on 'The Complete Idiot's Guide to Music Theory.' Features include detailed chapter breakdowns, visual music notation, and an AI-powered tutor to answer your questions.",
+  "requestFramePermissions": []
+}

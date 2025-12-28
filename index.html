@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Music Theory Tutor | SCHOOLCLASS.NET</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/abcjs@6.4.1/abcjs-audio.css">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'sans': ['Inter', 'sans-serif'],
+              'serif': ['Merriweather', 'serif'],
+              'display': ['Space+Grotesk', 'sans-serif'],
+            },
+            colors: {
+              'brand-orange': '#F97316',
+              'brand-dark': '#0F172A',
+              'brand-light': '#F8FAFC',
+              'brand-muted': '#64748B',
+              'accent-cyan': '#22D3EE',
+            },
+            animation: {
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.19.0",
+    "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.170.0/three.module.js",
+    "abcjs": "https://esm.sh/abcjs@6.4.1"
+  }
+}
+</script>
+<style>
+  * { cursor: none !important; }
+  body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #0F172A;
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0F172A;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #F97316;
+    border-radius: 4px;
+    border: 2px solid #0F172A;
+  }
+  .abcjs-container { background: transparent !important; }
+  .abcjs-note { fill: #0F172A !important; transition: fill 0.2s ease; }
+  .abcjs-staff { stroke: #CBD5E1 !important; }
+  
+  /* Highlight style for active notes during playback */
+  .abcjs-highlight {
+    fill: #F97316 !important;
+    filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.8));
+    transform: scale(1.1);
+    transform-origin: center;
+  }
+
+  #custom-cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    background: #F97316;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: normal;
+    transition: transform 0.1s ease-out;
+    box-shadow: 0 0 15px #F97316, 0 0 30px #F97316;
+  }
+
+  #cursor-trail {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: rgba(249, 115, 22, 0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: all 0.2s ease-out;
+  }
+</style>
+</head>
+  <body class="bg-brand-dark font-sans antialiased text-slate-200">
+    <div id="custom-cursor"></div>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+    <script>
+      const cursor = document.getElementById('custom-cursor');
+      const trails = [];
+      const trailCount = 8;
+
+      for (let i = 0; i < trailCount; i++) {
+        const trail = document.createElement('div');
+        trail.id = 'cursor-trail';
+        document.body.appendChild(trail);
+        trails.push(trail);
+      }
+
+      let mouseX = 0, mouseY = 0;
+      let cursorX = 0, cursorY = 0;
+
+      document.addEventListener('mousemove', e => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      function animate() {
+        cursorX += (mouseX - cursorX) * 0.2;
+        cursorY += (mouseY - cursorY) * 0.2;
+        
+        cursor.style.left = cursorX - 10 + 'px';
+        cursor.style.top = cursorY - 10 + 'px';
+
+        trails.forEach((trail, index) => {
+          const nextTrail = trails[index + 1] || { style: { left: cursorX + 'px', top: cursorY + 'px' } };
+          const ratio = 0.3;
+          const tx = parseFloat(trail.style.left) || cursorX;
+          const ty = parseFloat(trail.style.top) || cursorY;
+          
+          const targetX = parseFloat(nextTrail.style.left);
+          const targetY = parseFloat(nextTrail.style.top);
+
+          trail.style.left = tx + (targetX - tx) * ratio + 'px';
+          trail.style.top = ty + (targetY - ty) * ratio + 'px';
+          trail.style.transform = `scale(${1 - index / trailCount})`;
+          trail.style.opacity = 1 - index / trailCount;
+        });
+
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      document.addEventListener('mousedown', () => cursor.style.transform = 'scale(1.5)');
+      document.addEventListener('mouseup', () => cursor.style.transform = 'scale(1)');
+    </script>
+  </body>
+</html>
